@@ -1,0 +1,64 @@
+如果要在单片机B中接收从单片机A发送的二维数组数据，可以按照以下步骤来实现：
+
+定义一个指向指针的指针，用于存储接收到的二维数组数据。
+使用一个循环结构，每次接收一行数据。
+在接收每行数据时，首先动态分配内存，并将该行数据保存到数组中。
+如果没有新数据到达，则跳出循环。
+下面是一个示例程序，演示如何在单片机B中使用二维数组接收从单片机A发送的数据：
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main()
+{
+    int** arr = NULL;
+    int rows = 0, cols = 0;
+
+    while(1)
+    {
+        // 检查是否有新数据到达
+        if (check_new_data())
+        {
+            // 动态分配内存并保存数据
+            arr = (int**)realloc(arr, (rows+1) * sizeof(int*));
+            arr[rows] = (int*)malloc(cols * sizeof(int));
+
+            // 读取一行数据
+            for (int i = 0; i < cols; i++)
+            {
+                arr[rows][i] = read_data();
+            }
+
+            rows++;
+        }
+        else
+        {
+            // 没有新数据，跳出循环
+            break;
+        }
+    }
+
+    // 输出接收到的二维数组
+    printf("Received 2D array:\n");
+    for (int i = 0; i < rows; i++)
+    {
+        for (int j = 0; j < cols; j++)
+        {
+            printf("%d ", arr[i][j]);
+        }
+        printf("\n");
+    }
+
+    // 释放动态分配的内存
+    for (int i = 0; i < rows; i++)
+    {
+        free(arr[i]);
+    }
+    free(arr);
+
+    return 0;
+}
+在上面的示例程序中，使用while循环不断检查是否有新数据到达。
+如果有新数据到达，则使用realloc函数动态分配内存，并在循环内部使用for循环接收每一行数据。
+需要注意的是，在动态分配内存时，先使用realloc函数分配行指针数组的内存，再使用malloc函数分配每行数据的内存。
+在程序结束前，必须使用free函数释放动态分配的内存。
