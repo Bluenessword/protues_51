@@ -1,0 +1,88 @@
+#include "reg52.h"			 
+#include "lcd.h"
+#include "usart.h"
+#include "key.h"
+#include "stdlib.h"
+u8 CHAR[]="      CHAR";
+u8 DIGIT[]="      DIGIT";
+u8 send[];
+u8 flag=0;  //0为字符模式 1为数字模式
+
+
+char* getRandomString(u8 string[],u8 length,u8 flag)
+{
+	u8 i;
+	srand(5000);
+	if(!flag)
+	{
+		for (i = 0; i < length - 1; i++)
+		{
+			flag = rand() % 2;
+			switch (flag)
+			{
+				case 0:
+					string[i] = 'A' + rand() % 26;
+					break;
+				case 1:
+					string[i] = 'a' + rand() % 26;
+					break;
+			}
+		}
+		string[length - 1] = '\0';
+		return string;	
+	}
+	else
+	{
+		for (i = 0; i < length - 1; i++)
+		{
+			string[i] = '0' + rand() % 10;
+		}
+		string[length - 1] = '\0';
+		return string;
+	}
+
+}
+
+
+void main(void)
+{
+	u8 i;
+	u8 key;
+	LcdInit();
+	UART_Init();
+	for(i=0;i<sizeof(CHAR)/sizeof(CHAR[0]);i++)
+	{
+		LcdWriteData(CHAR[i]);	
+	}
+	while(1)
+	{
+		key=KEY_Scan();
+        switch(key)
+        {
+			case KEY1_PRESS:
+				flag=~flag;
+				if(!flag)
+				{
+					LcdWriteCom(0x80);
+					for(i=0;i<sizeof(CHAR)/sizeof(CHAR[0]);i++)
+					{
+						LcdWriteData(CHAR[i]);	
+					}
+					
+				}
+				else
+				{
+					LcdWriteCom(0x80);
+					for(i=0;i<sizeof(DIGIT)/sizeof(DIGIT[0]);i++)
+					{
+						LcdWriteData(DIGIT[i]);	
+					}
+				}
+				break;
+			case KEY2_PRESS:
+				//UART_SendStr(Disp,sizeof(Disp)/sizeof(Disp[0]));
+				UART_Send_Data('g');
+				break;
+        }
+	};				
+}
